@@ -69,6 +69,7 @@ bool TwaiCAN::setPins(int8_t txPin, int8_t rxPin) {
 bool TwaiCAN::begin(TwaiSpeed twaiSpeed, 
                     int8_t txPin, int8_t rxPin,
                     uint16_t txQueue, uint16_t rxQueue,
+                    uint32_t alerts,
                     twai_filter_config_t*  fConfig,
                     twai_general_config_t* gConfig,
                     twai_timing_config_t*  tConfig)
@@ -85,7 +86,7 @@ bool TwaiCAN::begin(TwaiSpeed twaiSpeed,
         twai_general_config_t g_config = {.mode = TWAI_MODE_NORMAL, .tx_io = (gpio_num_t) tx, .rx_io = (gpio_num_t) rx, \
                                                 .clkout_io = TWAI_IO_UNUSED, .bus_off_io = TWAI_IO_UNUSED,      \
                                                 .tx_queue_len = txQueueSize, .rx_queue_len = rxQueueSize,       \
-                                                .alerts_enabled = TWAI_ALERT_NONE,  .clkout_divider = 0,        \
+                                                .alerts_enabled = alerts,  .clkout_divider = 0,        \
                                                 .intr_flags = ESP_INTR_FLAG_LEVEL1};
 
         twai_timing_config_t t_config[TWAI_SPEED_SIZE] = {

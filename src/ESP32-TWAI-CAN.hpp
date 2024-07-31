@@ -24,10 +24,12 @@
 #include "driver/twai.h"
 
 
+#include "esp_err.h"
+
 // Uncomment or declare before importing header
-//#define LOG_TWAI log_e
-//#define LOG_TWAI_TX log_e
-//#define LOG_TWAI_RX log_e
+#define LOG_TWAI log_e
+#define LOG_TWAI_TX log_e
+#define LOG_TWAI_RX log_e
 
 #ifndef LOG_TWAI
 #define LOG_TWAI
@@ -90,6 +92,7 @@ class TwaiCAN {
     bool begin(TwaiSpeed twaiSpeed = TWAI_SPEED_SIZE, 
                     int8_t txPin = -1, int8_t rxPin = -1,
                     uint16_t txQueue = 0xFFFF, uint16_t rxQueue = 0xFFFF,
+                    uint32_t alerts = TWAI_ALERT_NONE,
                     twai_filter_config_t*  fConfig = nullptr,
                     twai_general_config_t* gConfig = nullptr,
                     twai_timing_config_t*  tConfig = nullptr);
@@ -98,9 +101,14 @@ class TwaiCAN {
     inline bool IRAM_ATTR readFrame(CanFrame& frame, uint32_t timeout = 1000) { return readFrame(&frame, timeout); }
     inline bool IRAM_ATTR readFrame(CanFrame* frame, uint32_t timeout = 1000) {
         bool ret = false;
-        if((frame) && twai_receive(frame, pdMS_TO_TICKS(timeout)) == ESP_OK) {
-            LOG_TWAI_RX("Frame received %03X", frame->identifier);
-            ret = true;
+        if(frame) {
+            esp_err_t return_code = twai_receive(frame, pdMS_TO_TICKS(timeout));
+            if (return_code == ESP_OK) {
+                LOG_TWAI_RX("Frame received %03X", frame->identifier);
+                ret = true;
+            } else {
+                LOG_TWAI_RX("Receive return code %s", esp_err_to_name(return_code));
+            }
         }
         return ret;
     }
